@@ -1,10 +1,15 @@
 const express = require("express");
-const dotenv = require("dotenv");
+require("dotenv").config();
 const morgan = require('morgan');
-const connectDB = require("./config/connectDB");
+const sequelize = require("./config/connectDB");
 
-dotenv.config();
-connectDB();
+
+sequelize.authenticate().then(() => {
+   console.log('Connection has been established successfully.');
+}).catch((error) => {
+   console.error('Unable to connect to the database: ', error);
+});
+
 
 const app = express();
 

@@ -7,6 +7,7 @@ const EmailType = require("../utils/email-types");
 const httpStatusText = require("../utils/http-status-text");
 const jsonwebtoken = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const createActivityLog = require("../utils/create-activity-log");
 
 const register = asyncWrapper(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -14,7 +15,7 @@ const register = asyncWrapper(async (req, res, next) => {
   // in database schema [msg appear if email exists]
   // in database schema [msg appear if password not secure]
   // hash password before save in user-modal
-  const user = await User.create({name, email, password});
+  const user = await User.create({ name, email, password });
 
   await handleEmail(user, EmailType.VERIFICATION);
 
@@ -110,4 +111,73 @@ const resendVerification = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = { register, verifyAccount, login, resendVerification };
+const forgetPasswordEmail = asyncWrapper(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return next(
+      new CustomError("A reset password link has been sent to your email", 404),
+    );
+  }
+
+  await handleEmail(user, EmailType.RESET_PASSWORD);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "A reset password link has been sent to your email",
+  });
+});
+
+const sendResetPasswordEmail = asyncWrapper(async (req, res, next) => {
+  await handleEmail(req.user, EmailType.RESET_PASSWORD);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "A reset password link has been sent to your email",
+  });
+});
+
+const resetPassword = asyncWrapper(async (req, res, next) => {
+  const token = req.params.code;
+
+  let decodedToken;
+  try {
+    decodedToken = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return next(new CustomError("Reset password link expired", 401));
+    }
+    if (err.name === "JsonWebTokenError") {
+      return next(new CustomError("Invalid token", 401));
+    }
+    return next(err);
+  }
+
+  const { password } = req.body;
+
+  const user = await User.findByPk(decodedToken.userId);
+  if (!user) {
+    return next(new CustomError("User not found", 404));
+  }
+
+  user.password = password;
+  await user.save();
+  await handleEmail(user, EmailType.PASSWORD_CHANGED);
+  res
+    .status(200)
+    .json({
+      status: httpStatusText.SUCCESS,
+      message: "Password has been reset successfully",
+    });
+});
+
+module.exports = {
+  register,
+  verifyAccount,
+  login,
+  resendVerification,
+  forgetPasswordEmail,
+  sendResetPasswordEmail,
+  resetPassword,
+};

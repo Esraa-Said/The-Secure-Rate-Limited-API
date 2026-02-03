@@ -3,7 +3,7 @@ const httpStatusText = require("../utils/http-status-text");
 const globalErrorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
-
+  req.logStatus = "failed";
   if (
     err.name === "SequelizeValidationError" ||
     err.name === "SequelizeUniqueConstraintError"

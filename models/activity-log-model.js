@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/connectDB");
 
-
 const ActivityLog = sequelize.define(
   "ActivityLog",
   {
@@ -12,11 +11,12 @@ const ActivityLog = sequelize.define(
     },
 
     userId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: true,
       validate: {
-        isInt: {
-          msg: "User ID must be an integer",
+        isUUID: {
+          args: 4,
+          msg: "User ID must be a UUID v4",
         },
       },
     },
@@ -34,24 +34,24 @@ const ActivityLog = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("SUCCESS", "FAILED", "BLOCKED"),
+      type: DataTypes.ENUM("success", "failed", "blocked"),
       allowNull: false,
-      defaultValue: "SUCCESS",
+      defaultValue: "success",
       validate: {
         isIn: {
-          args: [["SUCCESS", "FAILED", "BLOCKED"]],
-          msg: "Status must be one of: SUCCESS, FAILED, BLOCKED",
+          args: [["success", "failed", "blocked"]],
+          msg: "Status must be one of: success, failed, blocked",
         },
       },
     },
 
     actorType: {
-      type: DataTypes.ENUM("USER", "SYSTEM", "ADMIN"),
-      defaultValue: "USER",
+      type: DataTypes.ENUM("user", "system"),
+      defaultValue: "user",
       validate: {
         isIn: {
-          args: [["USER", "SYSTEM", "ADMIN"]],
-          msg: "Actor type must be USER, SYSTEM, or ADMIN",
+          args: [["user", "system"]],
+          msg: "Actor type must be user or system",
         },
       },
     },

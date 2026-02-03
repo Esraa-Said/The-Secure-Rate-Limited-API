@@ -5,11 +5,13 @@ const getResetPasswordMail = require("./reset-password-mail");
 const EmailType = require("./email-types");
 const CustomError = require("./custom-error");
 const getWelcomeMail = require("./welcome-mail");
+const getPasswordChangedMail = require("./password-change-mail");
 
 const emailFunctions = {
   [EmailType.VERIFICATION]: (user, code) => getVerificationMail(user, code),
   [EmailType.RESET_PASSWORD]: (user, code) => getResetPasswordMail(user, code),
   [EmailType.WELCOME]: (user) => getWelcomeMail(user),
+  [EmailType.PASSWORD_CHANGED]: (user) => getPasswordChangedMail(user),
 };
 const handleEmail = async (user, type) => {
   if (!emailFunctions[type]) {
@@ -20,7 +22,6 @@ const handleEmail = async (user, type) => {
     code = await generateCode(user, type);
   }
 
-  
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

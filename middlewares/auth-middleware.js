@@ -6,6 +6,8 @@ const User = require("../models/user-model");
 
 const verifyAuthToken = asyncWrapper(async (req, res, next) => {
   let token = req.headers.authorization;
+  console.log(!token.startsWith("Bearer "));
+  
   if (!token || !token.startsWith("Bearer ")) {
     return next(new CustomError("Unauthorized: No token provided", 401));
   }
@@ -31,7 +33,7 @@ const verifyAuthToken = asyncWrapper(async (req, res, next) => {
     return next(new CustomError("User not found", 404));
   }
 
-  req.user = { id: decodedToken.userId, email: decodedToken.email };
+  req.user = { id: decodedToken.userId, email: decodedToken.email, name: user.name };
 
   next();
 });

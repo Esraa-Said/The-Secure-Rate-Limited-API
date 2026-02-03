@@ -14,7 +14,7 @@ const register = asyncWrapper(async (req, res, next) => {
   // in database schema [msg appear if email exists]
   // in database schema [msg appear if password not secure]
   // hash password before save in user-modal
-  const user = await User.create(req.body);
+  const user = await User.create({name, email, password});
 
   await handleEmail(user, EmailType.VERIFICATION);
 

@@ -29,7 +29,7 @@ app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => {
     app.listen(process.env.PORT);
     console.log("Server listening on port " + PORT);

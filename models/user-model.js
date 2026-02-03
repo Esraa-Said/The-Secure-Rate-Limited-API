@@ -1,11 +1,11 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/connectDB");
 const CustomError = require("../utils/custom-error");
 const bcrypt = require("bcryptjs");
 
 const beforeSave = async (user) => {
   if (user.name) user.name = user.name.trim();
-  if (user.email) user.email = user.email.trim();
+  if (user.email) user.email = user.email.trim().toLowerCase();
   if (user.changed("password")) {
     user.password = await bcrypt.hash(user.password, 10);
   }
@@ -15,8 +15,8 @@ const User = sequelize.define(
   "User",
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     name: {

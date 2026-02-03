@@ -20,7 +20,7 @@ const register = asyncWrapper(async (req, res, next) => {
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
-    message: "Mail is sent to your email, Please verify your account",
+    message: "Verification email sent. Please verify your account.",
   });
 });
 
@@ -74,7 +74,7 @@ const login = asyncWrapper(async (req, res, next) => {
   }
   if (!user.isVerified) {
     return next(
-      new CustomError("Please verify your email before logging in", 403),
+      new CustomError("Please verify your account before logging in", 403),
     );
   }
 
@@ -91,4 +91,23 @@ const login = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = { register, verifyAccount, login };
+const resendVerification = asyncWrapper(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ where: { email } });
+  if (!email) {
+    return next(new CustomError("User not found", 404));
+  }
+  if (user.isVerified) {
+    return next(new CustomError("Account already verified", 400));
+  }
+
+  await handleEmail(user, EmailType.VERIFICATION);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Verification email sent again",
+  });
+});
+
+module.exports = { register, verifyAccount, login, resendVerification };

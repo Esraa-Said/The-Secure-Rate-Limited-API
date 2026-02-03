@@ -4,7 +4,8 @@ const morgan = require("morgan");
 const sequelize = require("./config/connectDB");
 const globalErrorHandler = require("./middlewares/global-error-middleware");
 const CustomError = require("./utils/custom-error");
-const userRouter = require("./routes/auth-routes");
+const authRouter = require("./routes/auth-routes");
+const taskRouter = require("./routes/task-routes");
 
 
 // sequelize.authenticate().then(() => {
@@ -18,7 +19,8 @@ const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use('/auth', userRouter);
+app.use('/auth', authRouter);
+app.use('/task', taskRouter);
 
 app.use((req, res, next) => {
   next(new CustomError(`Invalid url`, 404));
@@ -29,8 +31,8 @@ app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 sequelize
-  // .sync({ alter: true })
-  .sync()
+  .sync({ alter: true })
+  // .sync()
   .then(() => {
     app.listen(process.env.PORT);
     console.log("Server listening on port " + PORT);

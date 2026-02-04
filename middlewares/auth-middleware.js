@@ -6,7 +6,6 @@ const User = require("../models/user-model");
 
 const verifyAuthToken = asyncWrapper(async (req, res, next) => {
   let token = req.headers.authorization;
-  console.log(!token.startsWith("Bearer "));
   
   if (!token || !token.startsWith("Bearer ")) {
     return next(new CustomError("Unauthorized: No token provided", 401));

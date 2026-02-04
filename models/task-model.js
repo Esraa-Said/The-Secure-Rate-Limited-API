@@ -68,6 +68,7 @@ const Task = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
       validate: {
+        isUUID: {args: 4, msg: "User id must be uuid"},
         notNull: { msg: "Task must be assigned to a user" },
         notEmpty: { msg: "User ID cannot be empty" },
       },

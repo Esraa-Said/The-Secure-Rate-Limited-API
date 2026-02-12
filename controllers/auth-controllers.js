@@ -88,6 +88,7 @@ const login = asyncWrapper(async (req, res, next) => {
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { user: { email: user.email, name: user.name } },
+    message: 'User login successfully',
     token: authToken,
   });
 });
@@ -96,8 +97,10 @@ const resendVerification = asyncWrapper(async (req, res, next) => {
   const { email } = req.body;
 
   const user = await User.findOne({ where: { email } });
-  if (!email) {
-    return next(new CustomError("User not found", 404));
+  
+  if (!user) {
+    
+    return next(new CustomError("User not found, Create an account first", 404));
   }
   if (user.isVerified) {
     return next(new CustomError("Account already verified", 400));

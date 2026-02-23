@@ -35,11 +35,59 @@ const updateTask = asyncWrapper(async (req, res, next) => {
 });
 
 const getAllTasks = asyncWrapper(async (req, res, next) => {
-  const tasks = await Task.findAll({ where: { userId: req.user.id } });
+  let { status, priority, title } = req.query;
+  const query = {
+    userId: req.user.id,
+    ...(status && {
+      status: {
+        [Op.like]: status,
+      },
+    }),
+    ...(priority && {
+      priority: {
+        [Op.like]: priority,
+      },
+    }),
+    ...(title && {
+      title: {
+        [Op.like]: `%${title}%`,
+      },
+    }),
+  };
+
+  const tasks = await Task.findAll({ where: query });
+
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { tasks },
     length: tasks.length,
+  });
+});
+
+const getTasksStatus = asyncWrapper(async (req, res, next) => {
+  const [
+    pendingTasks,
+    inProgressTasks,
+    completedTasks,
+    cancelledTasks,
+    totalTasks,
+  ] = await Promise.all([
+    Task.count({ where: { status: "PENDING", userId: req.user.id } }),
+    Task.count({ where: { status: "IN_PROGRESS", userId: req.user.id } }),
+    Task.count({ where: { status: "COMPLETED", userId: req.user.id } }),
+    Task.count({ where: { status: "CANCELLED", userId: req.user.id } }),
+    Task.count({ where: { userId: req.user.id } }),
+  ]);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      pendingTasks,
+      inProgressTasks,
+      completedTasks,
+      cancelledTasks,
+      totalTasks,
+    },
   });
 });
 const getAllDeletedTasks = asyncWrapper(async (req, res, next) => {
@@ -96,5 +144,6 @@ module.exports = {
   getAllTasks,
   softDeleteTasks,
   restoreDeleteTasks,
-  getAllDeletedTasks
+  getAllDeletedTasks,
+  getTasksStatus,
 };

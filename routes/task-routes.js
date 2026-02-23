@@ -12,5 +12,6 @@ router
 router.get("/deleted", authMiddleware, taskControllers.getAllDeletedTasks);
 router.patch("/restore", authMiddleware, taskControllers.restoreDeleteTasks);
 router.route("/:taskId").patch(authMiddleware, taskControllers.updateTask);
+router.get("/status", authMiddleware, taskControllers.getTasksStatus)
 
 module.exports = router;

@@ -35,7 +35,7 @@ const updateTask = asyncWrapper(async (req, res, next) => {
 });
 
 const getAllTasks = asyncWrapper(async (req, res, next) => {
-  let { status, priority, title } = req.query;
+  let { status, priority, title, dueDate } = req.query;
   const query = {
     userId: req.user.id,
     ...(status && {
@@ -53,6 +53,7 @@ const getAllTasks = asyncWrapper(async (req, res, next) => {
         [Op.like]: `%${title}%`,
       },
     }),
+    ...(dueDate && { dueDate }),
   };
 
   const tasks = await Task.findAll({ where: query });

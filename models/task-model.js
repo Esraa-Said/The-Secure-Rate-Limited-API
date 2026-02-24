@@ -57,7 +57,7 @@ const Task = sequelize.define(
     },
 
     dueDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true,
       validate: {
         isDate: { msg: "Due date must be a valid date" },
